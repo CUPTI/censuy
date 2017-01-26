@@ -89,4 +89,4 @@ ENV/
 .ropeproject
 
 # Vagrant box files
-./vagrant
+.vagrant/
