@@ -1,0 +1,81 @@
+---
+- hosts: wazimap
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: ensure apt cache is up to date
+      apt: update_cache=yes
+
+    - name: ensure packages are installed
+      apt: name={{item}}
+      with_items:
+        - postgresql
+        - libpq-dev
+        - python-psycopg2
+
+- hosts: wazimap
+  become: yes
+  become_user: postgres
+  gather_facts: no
+
+  vars:
+    dbname: wazimap
+    dbuser: wazimap
+    dbpassword: wazimap
+
+  tasks:
+    - name: ensure database is created
+      postgresql_db: name={{dbname}}
+
+    - name: ensure user has access to database
+      postgresql_user: db={{dbname}} name={{dbuser}} password={{dbpassword}} priv=ALL
+
+    - name: ensure user does not have unnecessary privilege
+      postgresql_user: name={{dbuser}} role_attr_flags=NOSUPERUSER,NOCREATEDB
+
+    - name: ensure no other user can access the database
+      postgresql_privs: db={{dbname}} role=PUBLIC type=database priv=ALL state=absent
+
+- hosts: wazimap
+  become: yes
+  gather_facts: no
+
+  roles:
+    - pip
+
+  tasks:
+    - name: add repository for GDAL
+      apt_repository: repo='ppa:ubuntugis/ppa'
+
+    - name: ensure apt cache is up to date
+      apt: update_cache=yes
+
+    - name: ensure packages are installed
+      apt: name={{item}}
+      with_items:
+        - python
+        - binutils
+        - libproj-dev
+        - gdal-bin
+        - python-gdal
+        - libpq-dev
+        - python-dev
+
+    - name: ensure django is installed
+      pip: name=django version=1.9
+
+    - name: start wazimap project
+      command: django-admin startproject wazimap_ex creates=wazimap_ex/manage.py
+
+    - name: remove wazimap unnecessary files 
+      command: rm wazimap_ex/urls.py wazimap_ex/wsgi.py chdir=wazimap_ex/ removes=wazimap_ex/urls.py
+
+    - name: ensure wazimap is installed
+      pip: name=wazimap version=0.7.1
+
+    - name: append content to the wazimap settings
+      shell: cat /vagrant/wazimap.py >> wazimap_ex/wazimap_ex/settings.py
+
+    - name: setup database of wazimap
+      command: python manage.py migrate chdir=wazimap_ex/

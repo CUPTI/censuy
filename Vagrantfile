@@ -14,6 +14,9 @@ Vagrant.configure("2") do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "ubuntu/trusty64"
 
+  config.vm.define "wazimap" do |wazimap|
+  end
+
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.
@@ -64,39 +67,44 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision :shell, :path => "postgres/bootstrap.sh"
+  #config.vm.provision :shell, :path => "postgres/bootstrap.sh"
 
-  config.vm.provision "shell", inline: <<-SHELL
-    echo "Configurando python, pip y gdal"
-    add-apt-repository ppa:ubuntugis/ppa
-    apt-get update
-    apt-get install -y python
-    apt-get install -y binutils libproj-dev gdal-bin python-gdal libpq-dev python-dev
-    wget https://bootstrap.pypa.io/get-pip.py
-    python get-pip.py
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   echo "Configurando python, pip y gdal"
+  #   add-apt-repository ppa:ubuntugis/ppa
+  #   apt-get update
+  #   apt-get install -y python
+  #   apt-get install -y binutils libproj-dev gdal-bin python-gdal libpq-dev python-dev
+  #   wget https://bootstrap.pypa.io/get-pip.py
+  #   python get-pip.py
 
-    echo "Instalando Django"
-    pip install 'django<1.10'
+  #   echo "Instalando Django"
+  #   pip install 'django<1.10'
 
-    echo "Configurando Wazimap"
-    django-admin startproject wazimap_ex
-    cd wazimap_ex
-    rm wazimap_ex/urls.py wazimap_ex/wsgi.py
-    pip install wazimap
+  #   echo "Configurando Wazimap"
+  #   django-admin startproject wazimap_ex
+  #   cd wazimap_ex
+  #   rm wazimap_ex/urls.py wazimap_ex/wsgi.py
+  #   pip install wazimap
 
-    echo "# pull in the default wazimap settings
-    from wazimap.settings import *  # noqa
+  #   echo "# pull in the default wazimap settings
+  #   from wazimap.settings import *  # noqa
 
-    # install this app before Wazimap
-    INSTALLED_APPS = ['wazimap_ex'] + INSTALLED_APPS
+  #   # install this app before Wazimap
+  #   INSTALLED_APPS = ['wazimap_ex'] + INSTALLED_APPS
 
-    # Localise this instance of Wazimap
-    WAZIMAP['name'] = 'Wazimap Example'
-    # NB: this must be https if your site supports HTTPS.
-    WAZIMAP['url'] = 'http://wazimap.example.com'
-    WAZIMAP['country_code'] = 'EX'" >> wazimap_ex/settings.py
+  #   # Localise this instance of Wazimap
+  #   WAZIMAP['name'] = 'Wazimap Example'
+  #   # NB: this must be https if your site supports HTTPS.
+  #   WAZIMAP['url'] = 'http://wazimap.example.com'
+  #   WAZIMAP['country_code'] = 'EX'" >> wazimap_ex/settings.py
 
-    python manage.py migrate
-  SHELL
+  #   python manage.py migrate
+  # SHELL
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.verbose = "v"
+    ansible.playbook = "wazimap.yaml"
+  end
 
 end
