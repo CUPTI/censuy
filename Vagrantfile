@@ -25,7 +25,7 @@ Vagrant.configure("2") do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 5432, host: 55432
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -67,40 +67,6 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  #config.vm.provision :shell, :path => "postgres/bootstrap.sh"
-
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   echo "Configurando python, pip y gdal"
-  #   add-apt-repository ppa:ubuntugis/ppa
-  #   apt-get update
-  #   apt-get install -y python
-  #   apt-get install -y binutils libproj-dev gdal-bin python-gdal libpq-dev python-dev
-  #   wget https://bootstrap.pypa.io/get-pip.py
-  #   python get-pip.py
-
-  #   echo "Instalando Django"
-  #   pip install 'django<1.10'
-
-  #   echo "Configurando Wazimap"
-  #   django-admin startproject wazimap_ex
-  #   cd wazimap_ex
-  #   rm wazimap_ex/urls.py wazimap_ex/wsgi.py
-  #   pip install wazimap
-
-  #   echo "# pull in the default wazimap settings
-  #   from wazimap.settings import *  # noqa
-
-  #   # install this app before Wazimap
-  #   INSTALLED_APPS = ['wazimap_ex'] + INSTALLED_APPS
-
-  #   # Localise this instance of Wazimap
-  #   WAZIMAP['name'] = 'Wazimap Example'
-  #   # NB: this must be https if your site supports HTTPS.
-  #   WAZIMAP['url'] = 'http://wazimap.example.com'
-  #   WAZIMAP['country_code'] = 'EX'" >> wazimap_ex/settings.py
-
-  #   python manage.py migrate
-  # SHELL
 
   config.vm.provision "ansible" do |ansible|
     ansible.verbose = "v"

@@ -46,7 +46,7 @@
 
   tasks:
     - name: add repository for GDAL
-      apt_repository: repo='ppa:ubuntugis/ppa'
+      apt_repository: repo='ppa:ubuntugis/ppa' validate_certs=no
 
     - name: ensure apt cache is up to date
       apt: update_cache=yes
